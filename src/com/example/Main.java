@@ -14,19 +14,16 @@ public class Main {
         CustomThreadPoolExecutor executor = new CustomThreadPoolExecutor(CORE_POOL_SIZE,
                 MAX_POOL_SIZE, 4000, TimeUnit.MILLISECONDS, blockingQueue);
 
-        executor.setRejectedExecutionHandler(new RejectedExecutionHandler() {
-            @Override
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                System.out.println("У пользователя номер: "+((Customer) r).getId()+" произошла ошибка обслуживания");
-                System.out.println("Обработка ошибки...");
-                try {
-                    TimeUnit.MILLISECONDS.sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("Повторное добавление пользователя номер: " + ((Customer) r).getId()+" в очередь");
-                executor.execute(r);
+        executor.setRejectedExecutionHandler((r, executor1) -> {
+            System.out.println("У пользователя номер: "+((Customer) r).getId()+" произошла ошибка обслуживания");
+            System.out.println("Обработка ошибки...");
+            try {
+                TimeUnit.MILLISECONDS.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            System.out.println("Повторное добавление пользователя номер: " + ((Customer) r).getId()+" в очередь");
+            executor1.execute(r);
         });
 
         executor.prestartAllCoreThreads();
